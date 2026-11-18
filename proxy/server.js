@@ -136,6 +136,6 @@ if (!process.env.NO_APP) {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname); if (p.endsWith('/')) p += 'index.html';
     const f = path.resolve(APP_ROOT, '.' + p);
     if (!f.startsWith(APP_ROOT + path.sep) || /[\\/](proxy|sheets|\.git)[\\/]/.test(f)) { res.writeHead(403); return res.end('Forbidden'); }
-    fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); res.end('Not found'); } else { res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' }); res.end(d); } });
+    fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); res.end('Not found'); } else { res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream', 'cache-control': 'no-store' }); res.end(d); } });
   }).listen(APP_PORT, () => console.log('Credible app:    http://localhost:' + APP_PORT + '/'));
 }

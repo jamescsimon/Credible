@@ -3,7 +3,7 @@
    Columns are found by their header text, so authors can add more "Supporting Clue" columns.
    Source: config.sheetUrl (Apps Script web app, returns that day's row) or config.localFile (a CSV of the same table). */
 (function (C) {
-  var cfg = C.config;
+  var cfg = C.config, BUILD = Date.now();
   var APP = ['js/state.js', 'js/stats.js', 'js/sound.js', 'js/icons.js', 'js/wm.js', 'js/apps/browser.js', 'js/apps/control.js',
     'js/apps/taskmgr.js', 'js/apps/widgets.js', 'js/apps/info.js', 'js/main.js'];
 
@@ -123,7 +123,7 @@
   }
   function inject(list, done) {
     var s = list.shift(); if (!s) return done();
-    var el = document.createElement('script'); el.src = s;
+    var el = document.createElement('script'); el.src = s + '?v=' + BUILD; // never run a stale cached copy
     el.onload = function () { inject(list, done); };
     el.onerror = function () { show('<b>Could not load ' + s + '</b>'); };
     document.body.appendChild(el);
