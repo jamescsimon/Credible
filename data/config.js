@@ -13,8 +13,9 @@ window.Credible = {
     // CSV copy of the same table. Used when sheetUrl is empty or unreachable. Needs http(s), not file://.
     localFile: 'data/questions.csv',
 
-    // Page proxy (proxy/server.js). Most news sites refuse to be shown in an iframe; the proxy lets them load and records links the
-    // player clicks inside them. If it is not running, the browser falls back to loading pages directly. '' = never use a proxy.
-    proxyUrl: 'http://localhost:8787'
+    // Page proxies. Most news sites refuse to be shown in an iframe; a proxy lets them load and records links the player clicks
+    // inside them. If no proxy is reachable the browser falls back to loading pages directly (sites that block framing stay blank).
+    localProxyUrl: 'http://localhost:8787',   // used only when the game is opened from localhost (node proxy/server.js)
+    proxyUrl: 'https://credible.swaggysimon24.workers.dev'   // hosted proxy for GitHub Pages etc.: your Cloudflare Worker, e.g. 'https://credible.YOURNAME.workers.dev'
   }
 };

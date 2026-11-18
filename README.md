@@ -16,7 +16,12 @@ Most news sites refuse to appear inside an iframe (`X-Frame-Options` / `frame-an
 - If the proxy is not running, the browser falls back to plain iframes: sites that allow embedding work, others stay blank (use the **↗** button to open them in a real tab). Links clicked inside those pages cannot be recorded.
 - Some sites put a bot check ("Just a moment…") in front of automated fetches. The proxy does not try to defeat those; it shows a message and the player can use **↗**. In a test, 5 of the 8 sites in the example sheet loaded (BuzzFeed, Breitbart, ScienceAlert, Climate.gov, VT Foreign Policy's other pages); vtforeignpolicy.com's article, Politico and AP showed the bot check. Pick sources that load, or accept ↗ for them.
 - The proxy refuses private-network addresses, only handles http(s), limits size and time, and never forwards cookies. It is still an open fetcher: **do not expose it publicly without access control**. The proxy must be on a different origin from the app (different port or host).
-- Hosting the game publicly means hosting the proxy too (any Node host). Set `proxyUrl` in `data/config.js` to its address.
+- **GitHub Pages / any static host cannot run a proxy**, so a hosted copy needs one elsewhere. `proxy/worker.js` is the same proxy as a free Cloudflare Worker:
+  1. dash.cloudflare.com > Workers & Pages > Create > Create Worker > Deploy, then *Edit code*, paste `proxy/worker.js`, Deploy.
+  2. Worker > Settings > Variables: add `ALLOWED_ORIGINS` = `https://YOURNAME.github.io` (your Pages site; comma-separate more). Without it anyone can use your Worker as a free proxy.
+  3. Put the Worker address in `proxyUrl` in `data/config.js` (e.g. `https://credible.YOURNAME.workers.dev`), commit and push.
+
+  On localhost the game uses `localProxyUrl` (`node proxy/server.js`); anywhere else it uses `proxyUrl`. With neither reachable it loads pages directly and blocked sites stay blank (that is what a Pages copy shows until the Worker is set up).
 
 ## How it plays
 1. **Internet Browser**: the article is open. Read it, click links inside it, open **☰** for the *Links from the article* list and *History*, type a web address, or type words to search the web (the search opens in a real tab and the query is logged).
@@ -52,7 +57,7 @@ That one URL serves today's question (only that day's row is ever sent, so other
 ## Layout
 ```
 index.html  css/  js/ (loader, csv, state, stats, wm, sound, icons, main, apps/*)
-data/ (config, categories, questions.csv)  proxy/server.js  sheets/Code.gs  images/  licenses/
+data/ (config, categories, questions.csv)  proxy/ (server.js local, worker.js Cloudflare)  sheets/Code.gs  images/  licenses/
 ```
 
 ## Assets and licenses

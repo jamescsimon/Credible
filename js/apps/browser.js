@@ -19,7 +19,10 @@
     } catch (e) { return u; }
   }
 
-  var PROXY = (C.config.proxyUrl || '').replace(/\/+$/, '');
+  // On localhost use the local proxy (node proxy/server.js). Anywhere else use the hosted one (proxy/worker.js). Never probe
+  // localhost from a public page: the visitor has no such proxy and Chrome would ask them for local-network permission.
+  var onLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  var PROXY = ((onLocal ? (C.config.localProxyUrl || C.config.proxyUrl) : C.config.proxyUrl) || '').replace(/\/+$/, '');
   var proxyOn = false, ready = !PROXY, expect = null, prevReal = null;
   var els = {}, loaded = null;
   var srcFor = function (u) { return proxyOn ? PROXY + '/?url=' + encodeURIComponent(u) : u; };
