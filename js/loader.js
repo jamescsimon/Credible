@@ -5,7 +5,7 @@
 (function (C) {
   var cfg = C.config, BUILD = Date.now();
   var APP = ['js/state.js', 'js/stats.js', 'js/sound.js', 'js/icons.js', 'js/wm.js', 'js/apps/browser.js', 'js/apps/control.js',
-    'js/apps/taskmgr.js', 'js/apps/widgets.js', 'js/apps/info.js', 'js/main.js'];
+    'js/apps/taskmgr.js', 'js/apps/widgets.js', 'js/apps/info.js', 'js/apps/calendar.js', 'js/main.js'];
 
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var str = function (v) { return v === undefined || v === null ? '' : String(v).trim(); };
@@ -20,6 +20,11 @@
     var m = /[?&]date=(\d{4}-\d{2}-\d{2})/.exec(location.search);
     return (m && m[1]) || cfg.puzzleDate || today();
   }
+  /* The calendar can "time travel" to another day for testing; those games are never reported to the shared statistics. */
+  C.today = today();
+  C.view = wantedDate();
+  C.timeTravel = C.view !== C.today;
+  C.playable = [];                                   // dates that have a question, for the calendar
   function isoDate(v) { // tolerate Sheets turning 2026-11-17 into 11/17/2026
     var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(str(v));
     return m ? m[3] + '-' + (m[1].length < 2 ? '0' : '') + m[1] + '-' + (m[2].length < 2 ? '0' : '') + m[2] : str(v);
@@ -47,7 +52,7 @@
       why: at(function (h) { return h === 'reasoning'; }),
       cred: (at(function (h) { return h.indexOf('credibility') === 0; })[0]),
       clue: at(function (h) { return h.indexOf('supporting clue') === 0 || h === 'clue'; }),
-      date: (at(function (h) { return h === 'date'; })[0]),
+      date: (at(function (h) { return h.indexOf('date') === 0; })[0]),
       done: at(function (h) { return h === 'players_completed'; })[0], solved: at(function (h) { return h === 'players_solved'; })[0],
       ag: at(function (h) { return h === 'avg_guesses'; })[0], at: at(function (h) { return h === 'avg_time_sec'; })[0]
     };
@@ -60,9 +65,14 @@
     var r;
     if (col.date !== undefined && rows.some(function (x) { return str(x[col.date]); })) {
       var dated = rows.filter(function (x) { return str(x[col.date]); }).map(function (x) { x._d = isoDate(x[col.date]); return x; });
+      dated.forEach(function (x) { if (C.playable.indexOf(x._d) < 0) C.playable.push(x._d); });
+      // A question becomes playable on its date: use that day's row, else the most recent one already playable.
       r = dated.filter(function (x) { return x._d === date; })[0] ||
-        dated.filter(function (x) { return x._d <= date; }).sort(function (a, b) { return a._d < b._d ? 1 : -1; })[0] ||
-        dated.sort(function (a, b) { return a._d < b._d ? -1 : 1; })[0];
+        dated.filter(function (x) { return x._d <= date; }).sort(function (a, b) { return a._d < b._d ? 1 : -1; })[0];
+      if (!r) {
+        var first = dated.map(function (x) { return x._d; }).sort()[0], err = new Error('No question is playable on ' + date + ' yet. The first one unlocks on ' + first + '.');
+        err.firstDate = first; throw err;
+      }
     } else {
       // no dates: one question per day, in order, starting on config.startDate and then repeating
       var n = rows.length, i = (dayNumber(date) - dayNumber(cfg.startDate || date)) % n;
@@ -105,14 +115,15 @@
     var u = cfg.sheetUrl + (cfg.sheetUrl.indexOf('?') < 0 ? '?' : '&') + 'date=' + date + '&start=' + encodeURIComponent(cfg.startDate || '');
     return fetchText(u).then(function (t) {
       var d; try { d = JSON.parse(t); } catch (e) { throw new Error('The sheet web app did not return data (is it deployed with access “Anyone”?).'); }
-      if (d.error) throw new Error('Sheet: ' + d.error);
+      if (d.dates) C.playable = d.dates.slice();
+      if (d.error) { var err = new Error(d.firstDate ? 'No question is playable on ' + date + ' yet. The first one unlocks on ' + d.firstDate + '.' : 'Sheet: ' + d.error); err.firstDate = d.firstDate; throw err; }
       return d.table;
     });
   }
   function fromFile() { return fetchText(cfg.localFile).then(function (x) { return C.csv.parse(x); }); }
   function load() {
     var date = wantedDate();
-    var src = cfg.sheetUrl ? fromSheet(date).catch(function (e) { if (!cfg.localFile) throw e; console.warn(e.message + ' Using the local file.'); return fromFile(); }) : fromFile();
+    var src = cfg.sheetUrl ? fromSheet(date).catch(function (e) { if (e.firstDate || !cfg.localFile) throw e; console.warn(e.message + ' Using the local file.'); return fromFile(); }) : fromFile();
     return src.then(function (table) { return build(table, date); });
   }
 
@@ -135,7 +146,8 @@
     inject(APP.slice(), function () { document.getElementById('boot').hidden = true; });
   }, function (e) {
     var file = location.protocol === 'file:';
-    show('<b>Couldn’t load the question of the day.</b><p>' + esc(e.message) + '</p>' +
+    show('<b>' + (e.firstDate ? 'Nothing to play yet' : 'Couldn’t load the question of the day.') + '</b><p>' + esc(e.message) + '</p>' +
+      (e.firstDate ? '<p><a href="?date=' + esc(e.firstDate) + '" style="color:#fff">Go to ' + esc(e.firstDate) + '</a></p>' : '') +
       (file ? '<p>Browsers block reading local files from a <code>file://</code> page. Set <code>sheetUrl</code> in <code>data/config.js</code>, or serve this folder, e.g. <code>python -m http.server</code>, and open <code>http://localhost:8000</code>.</p>' : ''));
   });
 })(window.Credible);

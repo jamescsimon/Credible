@@ -62,7 +62,11 @@
   // ---- Clock ----
   function clock() {
     var d = new Date(), h = d.getHours() % 12 || 12, m = d.getMinutes();
-    $('tray-clock').textContent = h + ':' + (m < 10 ? '0' : '') + m + ' ' + (d.getHours() < 12 ? 'AM' : 'PM');
+    var t = h + ':' + (m < 10 ? '0' : '') + m + ' ' + (d.getHours() < 12 ? 'AM' : 'PM');
+    // while time-travelling, show the day being played so it is never a surprise
+    $('tray-clock').textContent = (C.timeTravel ? '⏪ ' + C.view.slice(5).replace('-', '/') + ' · ' : '') + t;
+    $('tray-clock').classList.toggle('tt', C.timeTravel);
+    $('tray-clock').title = C.timeTravel ? 'Time travel: playing ' + C.view + '. Click to change the day.' : 'Date and time (click to change day)';
   }
   clock(); setInterval(clock, 15000);
 

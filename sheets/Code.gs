@@ -7,9 +7,10 @@
  *   Original Source | Information Distorders? | Reasoning | Credibility (1-5) | Reasoning | Supporting Clue ...
  *   and, at the right, players_completed | players_solved | avg_guesses | avg_time_sec  (added automatically if missing)
  *
- * doGet  ?date=YYYY-MM-DD&start=YYYY-MM-DD -> the header row plus ONLY that day's question (other answers are never sent).
- *        With a "Date" column the row dated that day (else the latest earlier) is used; without one, questions are used
- *        one per day in row order starting on `start`, then repeat. Same rule as the page.
+ * doGet  ?date=YYYY-MM-DD&start=YYYY-MM-DD -> {table: [header, that day's row], dates: [every playable date]}. Other days'
+ *        answers are never sent. A "Date Playable" column makes a question playable from that date: the row dated that day
+ *        (else the latest earlier one) is used, and a day before the first date returns {error, firstDate}. Without a date
+ *        column, questions are used one per day in row order starting on `start`, then repeat. Same rule as the page.
  * doPost {question, guesses, seconds, solved} -> updates the statistics on the row whose Original Source is `question`:
  *        players_completed + 1, and each average moves by one more sample:  new_avg = (old_avg * n + x) / (n + 1)
  */
@@ -24,18 +25,20 @@ function doGet(e) {
     var start = String((e && e.parameter && e.parameter.start) || date);
     var t = readTable_(), head = t.head, rows = t.rows;
     var iSrc = idx_(head, function (h) { return h === 'original source' || h === 'source'; });
-    var iDate = idx_(head, function (h) { return h === 'date'; });
+    var iDate = idx_(head, function (h) { return h.indexOf('date') === 0; });
     rows = rows.filter(function (r) { return String(r[iSrc]).trim() !== ''; });
     if (!rows.length) return reply_({ error: 'no questions' });
-    var row;
+    var row, dates = [];
     if (iDate >= 0 && rows.some(function (r) { return r[iDate] !== ''; })) {
       var dated = rows.filter(function (r) { return r[iDate] !== ''; }).sort(function (a, b) { return a[iDate] < b[iDate] ? -1 : 1; });
-      row = dated.filter(function (r) { return r[iDate] === date; })[0] || dated.filter(function (r) { return r[iDate] <= date; }).pop() || dated[0];
+      dates = dated.map(function (r) { return r[iDate]; });
+      row = dated.filter(function (r) { return r[iDate] === date; })[0] || dated.filter(function (r) { return r[iDate] <= date; }).pop();
+      if (!row) return reply_({ error: 'no question is playable yet', firstDate: dated[0][iDate] });
     } else {
       var n = rows.length, i = (dayNumber_(date) - dayNumber_(start)) % n;
       row = rows[(i + n) % n];
     }
-    return reply_({ table: [head].concat([row]) });
+    return reply_({ table: [head].concat([row]), dates: dates });
   } catch (err) {
     return reply_({ error: String(err) });
   }

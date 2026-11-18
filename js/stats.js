@@ -8,7 +8,7 @@
 
   function report() {
     var S = C.state.get();
-    if (!cfg.sheetUrl || reported() || !C.game.isOver()) return;
+    if (!cfg.sheetUrl || C.timeTravel || reported() || !C.game.isOver()) return; // time-travel test games are never sent
     mark();
     var body = JSON.stringify({ question: P.question, date: P.date, guesses: S.guesses.length, seconds: Math.round(S.elapsed / 1000), solved: S.status === 'solved' });
     try {

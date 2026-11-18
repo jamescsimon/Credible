@@ -7,11 +7,12 @@
         '<h2><img src="images/retrobar/help.png" width="16" height="16" alt=""> How to play Credible</h2>' +
         '<p>A real article is open in the Internet Browser. Decide which <b>information-disorder category</b> best describes it. Some articles fit more than one; any correct category counts.</p>' +
         '<ol><li><b>Investigate</b> in the Internet Browser. Read the article, click links inside it, open the <b>Links from the article</b> list (☰), type a web address, or search the web. <b>History</b> shows where you have been.</li>' +
-        '<li><b>Choose</b> a category in the Control Panel and press <b>Submit answer</b>.</li>' +
-        '<li><b>Read the feedback.</b> You have ' + C.game.max + ' guesses. Investigating is free; only submitting uses a guess. A ruled-out category is disabled.</li>' +
+        '<li><b>Answer</b> in the Control Panel: choose a category <b>and</b> set the credibility rating slider (1 = not credible, 5 = very credible), then press <b>Submit answer</b>. Both must be right.</li>' +
+        '<li><b>Read the feedback.</b> You have ' + C.game.max + ' guesses. Investigating is free; only submitting uses a guess. It tells you whether the category and the rating were right (and if the rating should be higher or lower). A wrong category is ruled out.</li>' +
         '<li><b>Finish</b> by solving it or using every guess. The Task Manager then shows the result, the reasoning, a credibility rating and the sources.</li></ol>' +
         '<p>Time played is shown on the Alarm Clock. It is only a statistic: there is no time penalty and no score.</p>' +
         '<h3>Tips</h3><ul><li>If a page stays blank, that site does not allow embedding. Use the <b>↗</b> button to open it in a new browser tab.</li>' +
+        '<li>Click the clock in the taskbar to open a calendar and <b>time travel</b> to another day’s question (for testing).</li>' +
         '<li>Closed a window by accident? Reopen it from the Start menu or the desktop icons. Your progress is kept.</li>' +
         '<li>Your progress is saved in this browser. Use <b>Reset demo</b> in the Start menu to start over.</li></ul>';
     },

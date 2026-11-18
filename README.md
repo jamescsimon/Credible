@@ -25,10 +25,11 @@ Most news sites refuse to appear inside an iframe (`X-Frame-Options` / `frame-an
 
 ## How it plays
 1. **Internet Browser**: the article is open. Read it, click links inside it, open **☰** for the *Links from the article* list and *History*, type a web address, or type words to search the web (the search opens in a real tab and the query is logged).
-2. **Control Panel**: pick one of 8 categories and press **Submit answer**. Three guesses (investigating is free). Rejected categories are disabled; duplicates are blocked.
-3. A question can have **more than one correct category**; guessing any of them solves it. The results list them all.
-4. **Task Manager** opens when the puzzle ends: outcome, guesses, time, correct categories, credibility rating (1-5), reasoning, the sources (you can reopen them), and a spoiler-free copyable share result. If the sheet is connected it also shows how everyone else did.
-5. **Alarm Clock** shows time played (a statistic only, no penalty), **Media Player** has the music and mute/volume, the **Start menu** reopens windows, shows Instructions/Credits, and resets the demo.
+2. **Control Panel**: pick one of 8 categories **and** set the credibility slider (1-5), then press **Submit answer**. Both are part of the answer. Three guesses (investigating is free). Feedback says whether the category and the rating were right, and whether the real rating is higher or lower. A wrong category is ruled out; a right category with the wrong rating stays selectable; repeating the same category+rating is blocked. (`ratingTolerance` in `data/config.js` lets a near rating count; default 0 = exact.)
+3. A question can have **more than one correct category**; any of them is right. The results list them all.
+4. **Task Manager** opens when the puzzle ends: outcome, guesses, time, correct categories, credibility rating, reasoning, the sources (you can reopen them), and a spoiler-free copyable share result (🟩 both right, 🟨 category only, 🟥 wrong). The **Everyone** tab shows the averages and where you land on estimated bell curves (see below).
+5. **Time travel (testing):** click the clock in the taskbar. A Windows XP "Date and Time Properties" calendar opens; pick a day and OK to load that day's question (`?date=YYYY-MM-DD`). Days with a question have a dot. While time-travelling the clock shows ⏪ and the date, and finished games are **not** sent to the shared statistics. Progress is saved per day. A day before the first question's date shows "unlocks on…" with a link.
+6. **Alarm Clock** shows time played (a statistic only, no penalty), **Media Player** has the music and mute/volume, the **Start menu** reopens windows, shows Instructions/Credits, and resets the demo.
 
 Windows can be dragged (they stay on-screen), minimized, closed and reopened. Progress, timer, browser history, window layout and sound settings persist in `localStorage`, per day.
 
@@ -37,14 +38,19 @@ One sheet tab named `questions` (the example is `data/questions.csv`). Columns a
 
 | Column | What to write |
 |---|---|
+| `Date Playable` | `YYYY-MM-DD`: the day this question becomes playable. On a given day the game uses that day's row, or the most recent earlier one if there isn't one. (Leave the column out and questions run one per day in row order from `startDate`.) |
 | `Original Source` | the article's web address |
 | `Information Distorders?` | one or more category names, separated by commas: Satire, False connection, Misleading content, False context, Imposter content, Manipulated content, Fabricated content, None. Any listed one counts as correct. |
 | `Reasoning` (first) | why that classification is right (shown after the game) |
 | `Credibility (1-5)` | a number |
 | `Reasoning` (second) | why that credibility rating (shown after the game) |
 | `Supporting Clue` (as many columns as you like) | web addresses of pages that help (shown in the *Links from the article* list) |
-| `Date` (optional) | `YYYY-MM-DD`. Without it, questions run one per day in row order starting on `startDate` (in `data/config.js`), then repeat. |
-| `players_completed, players_solved, avg_guesses, avg_time_sec` | filled in by the script; don't edit |
+| `players_completed` | how many people have finished it (filled in by the script) |
+| `players_solved` | how many of them solved it |
+| `avg_guesses` | average tries so far |
+| `avg_time_sec` | average time in seconds so far |
+
+The four statistics columns are maintained by the script; don't edit them. **The first two rows of `data/questions.csv` contain made-up sample numbers** so the Everyone tab has something to draw; set them to 0 before real use.
 
 Only `http(s)` addresses are used. Unknown category names stop the game with a message listing the valid ones.
 
@@ -52,11 +58,14 @@ Only `http(s)` addresses are used. Unknown category names stop the game with a m
 1. Make a sheet with one tab named `questions` and import `data/questions.csv`.
 2. Extensions > Apps Script, paste `sheets/Code.gs`, Deploy > New deployment > Web app (execute as you, access: Anyone). Put the `/exec` URL in `sheetUrl` in `data/config.js`.
 
-That one URL serves today's question (only that day's row is ever sent, so other answers aren't exposed) and receives each finished game. The script adds 1 to `players_completed` and moves the averages with `new_avg = (old_avg × n + x) / (n + 1)`, so no per-player data is stored. The browser reports once per puzzle per browser.
+That one URL serves today's question (only that day's row is ever sent, plus the list of playable dates for the calendar, so other answers aren't exposed) and receives each finished game. The script adds 1 to `players_completed` and moves the averages with `new_avg = (old_avg × n + x) / (n + 1)`, so no per-player data is stored. The browser reports once per puzzle per browser.
+
+### How the bell curve is made
+Only averages are stored, not every player's score, so the curves are **estimates**: a normal (Gaussian) distribution centred on the average, with an assumed spread (tries: 35% of the average, at least 0.5; time: 45% of the average, at least 10 s). "Faster than N% of players" is `1 − Φ((you − average) / spread)` using the normal CDF, clamped to 1-99%. It says so on the screen.
 
 ## Layout
 ```
-index.html  css/  js/ (loader, csv, state, stats, wm, sound, icons, main, apps/*)
+index.html  css/  js/ (loader, csv, state, stats, wm, sound, icons, main, apps/* incl. calendar)
 data/ (config, categories, questions.csv)  proxy/ (server.js local, worker.js Cloudflare)  sheets/Code.gs  images/  licenses/
 ```
 

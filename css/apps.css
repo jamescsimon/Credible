@@ -26,6 +26,7 @@
 .cp-bb a { color: #1a3fb0; }
 .pips { display: flex; gap: 6px; }
 .pip { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #1c3fa8; background: #fff; }
+.pip.part { background: #f0b429; border-color: #9a6a00; } .pip.mini { display: inline-block; width: 10px; height: 10px; border-width: 1px; vertical-align: -1px; }
 .pip.bad { background: #d8433a; border-color: #8c1d16; } .pip.ok { background: #35a64a; border-color: #17661f; }
 .cp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; }
 .cp-scroll { flex: 1; min-height: 0; overflow: auto; padding: 12px 14px 4px; }
@@ -47,6 +48,8 @@
 .cp-tile.correct .cp-mark { color: #17661f; }
 .cp-fb { margin-top: 12px; padding: 8px 10px; border-radius: 6px; border: 1px solid; line-height: 1.4; }
 .cp-fb.ok { background: #e4f7e7; border-color: #35a64a; } .cp-fb.bad { background: #fdeceb; border-color: #d8433a; }
+.cp-rate { flex: none; padding: 8px 14px 4px; border-top: 1px solid #ddd; background: #fbfbf5; }
+.cp-rr { display: flex; align-items: center; gap: 8px; margin-top: 4px; } .cp-rr input { flex: 1; min-width: 0; } .cp-rv { min-width: 44px; text-align: right; color: #2b4fa6; }
 .cp-foot { flex: none; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 14px; border-top: 1px solid #ddd; background: #f6f6ee; }
 
 /* ---------- Task Manager ---------- */
@@ -66,6 +69,7 @@
 .tm-share { margin: 4px 0 8px; font: 14px 'Segoe UI Emoji', 'Lucida Console', monospace; white-space: pre-wrap; background: #f4f4f4; padding: 6px; border: 1px solid #ddd; }
 .tm-src { margin: 8px 0; } .tm-src a { color: #1a3fb0; font-weight: bold; }
 .tm-dots { color: #e2a400; letter-spacing: 2px; } .tm-dots i { font-style: normal; color: #ccc; }
+.tm-chart svg { width: 100%; height: auto; display: block; background: #fcfcfe; border: 1px solid #c8c5b3; margin: 4px 0; }
 .tm-lock { text-align: center; padding: 30px 12px; color: #444; }
 
 /* ---------- Widgets ---------- */
