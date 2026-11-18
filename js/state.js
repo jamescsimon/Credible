@@ -36,6 +36,8 @@
   var game = {
     puzzle: puzzle,
     max: cfg.maxGuesses,
+    /* A question can have several correct categories; any of them solves it. */
+    isCorrect: function (id) { return puzzle.answers.indexOf(id) !== -1; },
     isOver: function () { return S.status !== 'playing'; },
     guessed: function (id) { return S.guesses.indexOf(id) !== -1; },
     left: function () { return cfg.maxGuesses - S.guesses.length; },
@@ -49,20 +51,21 @@
       var cat = C.categories.filter(function (c) { return c.id === id; })[0];
       if (!cat) return null;
       S.guesses.push(id);
-      var correct = id === puzzle.answer;
+      var correct = game.isCorrect(id);
       if (correct) S.status = 'solved';
       else if (game.left() <= 0) S.status = 'failed';
       S.selected = null;
       S.feedback = {
         category: id, correct: correct,
-        text: correct ? 'Correct. That is the best description of this post.'
-          : (puzzle.feedback[id] || 'That category does not fit this post.'),
+        text: correct ? 'Correct. That category fits this article.'
+          : 'Not quite. That category doesn’t fit this article. Keep investigating its sources.',
         left: game.left()
       };
       emit(correct ? 'solved' : (S.status === 'failed' ? 'failed' : 'wrong'));
       return S.feedback;
     },
     markVisited: function (pageId) {
+      pageId = String(pageId).replace(/#.*$/, '');
       if (S.visited.indexOf(pageId) === -1) { S.visited.push(pageId); save(); }
     },
     categoryName: function (id) {
@@ -76,7 +79,7 @@
     },
     /* Spoiler-free: no category names, no explanation. */
     shareText: function () {
-      var sq = S.guesses.map(function (g) { return g === puzzle.answer ? '\u{1F7E9}' : '\u{1F7E5}'; });
+      var sq = S.guesses.map(function (g) { return game.isCorrect(g) ? '\u{1F7E9}' : '\u{1F7E5}'; });
       while (sq.length < cfg.maxGuesses) sq.push('⬜');
       var head = 'Credible ' + puzzle.date + ' · ' + (S.status === 'solved' ? 'Solved' : 'Not solved');
       return head + '\n' + sq.join('') + ' ' + S.guesses.length + '/' + cfg.maxGuesses + '\n⏱ ' + game.fmtTime(S.elapsed);

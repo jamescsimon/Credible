@@ -4,15 +4,15 @@
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
 
   function render() {
-    var S = C.state.get(), over = C.game.isOver(), answer = C.game.puzzle.answer;
+    var S = C.state.get(), over = C.game.isOver();
     var pips = '';
     for (var i = 0; i < C.game.max; i++) {
-      var g = S.guesses[i], cls = !g ? 'pip' : (g === answer ? 'pip ok' : 'pip bad');
+      var g = S.guesses[i], cls = !g ? 'pip' : (C.game.isCorrect(g) ? 'pip ok' : 'pip bad');
       pips += '<span class="' + cls + '"></span>';
     }
     var tiles = C.categories.map(function (c) {
-      var rejected = C.game.guessed(c.id) && c.id !== answer, correct = S.status === 'solved' && c.id === answer;
-      var revealed = S.status === 'failed' && c.id === answer;
+      var rejected = C.game.guessed(c.id) && !C.game.isCorrect(c.id), correct = S.status === 'solved' && C.game.isCorrect(c.id);
+      var revealed = S.status === 'failed' && C.game.isCorrect(c.id);
       var cls = 'cp-tile' + (S.selected === c.id ? ' sel' : '') + (rejected ? ' rejected' : '') + (correct || revealed ? ' correct' : '');
       var off = over || rejected;
       return '<button type="button" class="' + cls + '" data-cat="' + c.id + '"' + (off ? ' disabled' : '') + ' aria-pressed="' + (S.selected === c.id) + '">' +
@@ -35,7 +35,7 @@
       '<div class="cp-box"><div class="cp-bh">How it works</div><div class="cp-bb small"><div>Investigate in the browser for free. Only <b>Submit</b> uses a guess.</div></div></div>' +
       '<div class="cp-box"><div class="cp-bh">See also</div><div class="cp-bb"><a href="#" data-act="browser">Internet Browser</a>' +
       (over ? '<br><a href="#" data-act="results">Results (Task Manager)</a>' : '') + '</div></div></div>' +
-      '<div class="cp-main"><div class="cp-scroll"><h2>Pick a category</h2><div class="cp-sub">Which best describes the post?</div>' +
+      '<div class="cp-main"><div class="cp-scroll"><h2>Pick a category</h2><div class="cp-sub">Which best describes the article?</div>' +
       '<div class="cp-grid">' + tiles + '</div>' + fb + '</div>' +
       '<div class="cp-foot"><span class="small">' + (over ? 'Puzzle complete.' : (sel ? 'Selected: <b>' + esc(sel) + '</b>' : 'Select a category.')) + '</span>' +
       '<button type="button" class="xp-btn" data-act="submit"' + (canSubmit ? '' : ' disabled') + '>Submit answer</button></div></div>';

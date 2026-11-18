@@ -10,7 +10,7 @@
     var S = C.state.get();
     if (!cfg.sheetUrl || reported() || !C.game.isOver()) return;
     mark();
-    var body = JSON.stringify({ date: P.date, guesses: S.guesses.length, seconds: Math.round(S.elapsed / 1000), solved: S.status === 'solved' });
+    var body = JSON.stringify({ question: P.question, date: P.date, guesses: S.guesses.length, seconds: Math.round(S.elapsed / 1000), solved: S.status === 'solved' });
     try {
       // text/plain + no-cors avoids a CORS preflight, which Apps Script web apps do not answer.
       fetch(cfg.sheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, keepalive: true })

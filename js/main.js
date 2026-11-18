@@ -4,7 +4,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   // ---- Windows ----
-  C.wm.define({ id: 'browser', title: 'Internet Browser', icon: '<span class="mini">' + I.browser + '</span>', w: 700, h: 560, open: true,
+  C.wm.define({ id: 'browser', title: 'Internet Browser', icon: '<span class="mini">' + I.browser + '</span>', w: 780, h: 580, open: true,
     pos: function (vw, vh, s) { return { x: Math.min(100, Math.max(8, vw - s.w - 8)), y: Math.max(8, (vh - s.h) / 2 - 10) }; }, build: C.browser.build });
   C.wm.define({ id: 'control', title: 'Control Panel', icon: '<span class="mini">' + I.control + '</span>', w: 560, h: 560, open: true,
     pos: function (vw, vh, s) { return { x: Math.max(8, vw - s.w - 24), y: Math.max(8, (vh - s.h) / 2 - 10) }; }, build: C.controlPanel.build });
