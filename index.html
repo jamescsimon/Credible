@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Credible</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/desktop.css">
+  <link rel="stylesheet" href="css/windows.css">
+  <link rel="stylesheet" href="css/apps.css">
+  <link rel="stylesheet" href="css/social.css">
+</head>
+<body>
+  <div id="desktop">
+    <div id="icons"></div>
+    <div id="windows"></div>
+  </div>
+
+  <div id="start-menu" hidden>
+    <div class="sm-head"><div class="sm-avatar">?</div><span>Detective</span></div>
+    <div class="sm-body">
+      <ul class="sm-left" id="sm-apps"></ul>
+      <ul class="sm-right" id="sm-system"></ul>
+    </div>
+    <div class="sm-foot">
+      <button id="sm-reset" type="button" title="Clear saved progress for this puzzle">&#8635; Reset demo</button>
+    </div>
+  </div>
+
+  <div id="taskbar">
+    <button id="start-btn" type="button" aria-label="Start" aria-haspopup="true"></button>
+    <div id="tasks"></div>
+    <div id="tray">
+      <button id="tray-sound" type="button" title="Sound settings">&#128266;</button>
+      <span id="tray-clock">--:--</span>
+    </div>
+  </div>
+
+  <noscript>Credible needs JavaScript enabled.</noscript>
+
+  <div id="boot" class="boot" role="status"></div>
+
+  <script src="data/config.js"></script>
+  <script src="data/categories.js"></script>
+  <script src="js/csv.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/loader.js"></script>
+</body>
+</html>
